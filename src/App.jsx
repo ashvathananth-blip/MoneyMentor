@@ -2,13 +2,6 @@ import { useState } from "react";
 import { discoveries } from "./data/discoveries.js";
 import "./App.css";
 
-
-
-
-
-
-
-
 function App() {
   
   const [selectedTip, setSelectedTip] = useState(null);
