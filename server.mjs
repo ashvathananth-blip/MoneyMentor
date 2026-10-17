@@ -1,3 +1,4 @@
+
 import express from "express";
 import "dotenv/config";
 
@@ -180,3 +181,4 @@ app.listen(PORT, "127.0.0.1", () => {
     `MoneyMentor Groq API running on port ${PORT}`
   );
 });
+
