@@ -9,9 +9,8 @@
 // AI-GENERATED IN THIS FILE
 //   • The section layout, the navbar/hero/footer composition, and the
 //     `activeCategory` UI state for the category chip row.
-
-import { useState } from "react";
-import { discoveries } from "./data/discoveries.js";
+import { useEffect, useRef, useState } from "react";
+import { discoveries as fallbackDiscoveries } from "./data/discoveries.js";
 import Navbar from "./components/Navbar.jsx";
 import Hero from "./components/Hero.jsx";
 import CategoryFilter from "./components/CategoryFilter.jsx";
@@ -41,20 +40,99 @@ function App() {
   // Presentation state for the category chips only. It highlights a chip; it
   // does not change which discoveries are listed. See the note below.
   const [activeCategory, setActiveCategory] = useState("All");
+  const [discoveries, setDiscoveries] = useState(fallbackDiscoveries);
+  const [previousTitles, setPreviousTitles] = useState([]);
+  const [previousSourceIds, setPreviousSourceIds] = useState([]);
+  const [loadingDiscoveries, setLoadingDiscoveries] = useState(false);
+  const [discoveryError, setDiscoveryError] = useState("");
+  const initialLoadStarted = useRef(false);
 
-  // Derived from the data so the hero never claims a category that has no
-  // content behind it.
-  const categories = [...new Set(discoveries.map((tip) => tip.category))];
+  async function loadDiscoveries(
+    titlesToAvoid = [],
+    sourceIdsToAvoid = []
+  ) {
+    setLoadingDiscoveries(true);
+    setDiscoveryError("");
 
-  // ==========================================================================
-  // STUDENT LAYER — discovery filtering and ranking
-  // --------------------------------------------------------------------------
-  // This passes the full list straight through, because filtering and
-  // source-ranking are the student's own features to build. Replace this with
-  // your own logic (using `activeCategory`) when it is ready — every card below
-  // already re-renders from whatever this array contains.
-  // ==========================================================================
-  const visibleDiscoveries = discoveries;
+    try {
+      const response = await fetch("/api/discover", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          previousTitles: titlesToAvoid,
+          previousSourceIds: sourceIdsToAvoid,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.error || "Unable to generate discoveries."
+        );
+      }
+
+      if (
+        !Array.isArray(data.discoveries) ||
+        data.discoveries.length === 0
+      ) {
+        throw new Error("No discoveries were returned.");
+      }
+
+      const newDiscoveries = data.discoveries;
+
+      setDiscoveries(newDiscoveries);
+
+      setPreviousSourceIds((existing) => [
+        ...new Set([
+          ...existing,
+          ...newDiscoveries.flatMap((item) =>
+            (item.sources || []).map((source) => source.id)
+          ),
+        ]),
+      ]);
+
+      setPreviousTitles((existing) => [
+        ...existing,
+        ...newDiscoveries.map((item) => item.title),
+      ]);
+
+      setSelectedTip(null);
+      setActiveCategory("All");
+    } catch (error) {
+      setDiscoveryError(
+        error instanceof Error
+          ? error.message
+          : "Unable to generate discoveries."
+      );
+    } finally {
+      setLoadingDiscoveries(false);
+    }
+  }
+
+  useEffect(() => {
+    if (initialLoadStarted.current) return;
+
+    initialLoadStarted.current = true;
+    loadDiscoveries([]);
+  }, []);
+
+  const categories = [
+    ...new Set(discoveries.map((tip) => tip.category)),
+  ];
+
+  const visibleDiscoveries =
+    activeCategory === "All"
+      ? discoveries
+      : discoveries.filter(
+          (tip) => tip.category === activeCategory
+        );
+
+  function handleDiscoverMore() {
+    loadDiscoveries(previousTitles, previousSourceIds);
+  }
 
   return (
     <>
@@ -67,16 +145,26 @@ function App() {
       <main>
         <Hero categories={categories} />
 
-        <section className="section" id="discover" aria-labelledby="discover-title">
+        <section
+          className="section"
+          id="discover"
+          aria-labelledby="discover-title"
+        >
           <div className="wrap">
             <div className="section__head">
               <p className="eyebrow">Discover</p>
-              <h2 className="section__title" id="discover-title">
+
+              <h2
+                className="section__title"
+                id="discover-title"
+              >
                 Discover Financial Opportunities
               </h2>
+
               <p className="section__lede">
-                Each card opens up to show what a topic covers. Tap Explore to
-                open one.
+                Explore financial opportunities, uncover
+                overlooked benefits, and learn practical
+                money skills.
               </p>
             </div>
 
@@ -85,6 +173,21 @@ function App() {
               activeCategory={activeCategory}
               onSelectCategory={setActiveCategory}
             />
+
+            {loadingDiscoveries && (
+              <p className="note" role="status">
+                Finding financial discoveries...
+              </p>
+            )}
+
+            {discoveryError && (
+              <p className="ai-error" role="alert">
+                {discoveryError}
+                {discoveries === fallbackDiscoveries
+                  ? " Showing starter discoveries instead."
+                  : " You can keep exploring the current cards."}
+              </p>
+            )}
 
             <div className="card-grid">
               {visibleDiscoveries.map((tip) => (
@@ -97,15 +200,32 @@ function App() {
               ))}
             </div>
 
-            {/* The original app rendered this section directly below the list,
-                and only one discovery can be open at a time. Both behaviours
-                are unchanged. */}
+            {visibleDiscoveries.length === 0 && (
+              <p className="note">
+                No discoveries in this category yet.
+                Try another category.
+              </p>
+            )}
+
             {selectedTip && (
               <DiscoveryDetail
                 discovery={selectedTip}
                 onClose={() => setSelectedTip(null)}
               />
             )}
+
+            <div className="discover-more">
+              <button
+                type="button"
+                className="btn btn--accent"
+                onClick={handleDiscoverMore}
+                disabled={loadingDiscoveries}
+              >
+                {loadingDiscoveries
+                  ? "Generating..."
+                  : "Discover More"}
+              </button>
+            </div>
           </div>
         </section>
 

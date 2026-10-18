@@ -1035,3 +1035,20 @@ html {
     opacity: 1;
   }
 }
+
+
+.discover-more {
+  display: flex;
+  justify-content: center;
+  margin-top: 32px;
+}
+
+.discover-more .btn {
+  min-width: 180px;
+}
+
+.discover-more .btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+

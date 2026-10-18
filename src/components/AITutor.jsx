@@ -41,8 +41,10 @@ function ThinkingDots() {
 }
 
 export default function AITutor() {
+  
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
+  const [sources, setSources] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -53,7 +55,9 @@ export default function AITutor() {
 
     setLoading(true);
     setAnswer("");
+    setSources([]);
     setError("");
+    setLoading(true);
 
     try {
       const response = await fetch("/api/ask", {
@@ -73,6 +77,7 @@ export default function AITutor() {
       }
 
       setAnswer(toPlainText(data.answer || "No answer returned."));
+      setSources(Array.isArray(data.sources) ? data.sources : []);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Unable to contact the AI."
@@ -153,20 +158,56 @@ export default function AITutor() {
             </p>
           )}
 
+
           <div className="ai-response" aria-live="polite">
             {answer && (
               <>
-                <h3 className="ai-response__title">MoneyMentor explains</h3>
-                <p className="ai-response__body">{answer}</p>
-                <p className="note ai-response__note">
-                  AI-generated educational information. Source verification is
-                  not yet enabled, so no source is attached to this answer.
+                <h3 className="ai-response__title">
+                  MoneyMentor explains
+                </h3>
+
+                <p className="ai-response__body">
+                  {answer.replace(/\[\d+\]/g, "").trim()}
                 </p>
               </>
             )}
           </div>
+
+          {sources.length > 0 && (
+            <section className="ai-sources">
+              <h3>Official References</h3>
+              <p>AI responses may have error, please check the real 
+                source to make sure information provided is correct</p>
+
+              <div className="ai-source-list">
+                {sources.map((source) => (
+                  <a
+                    key={source.id}
+                    className="ai-source-card"
+                    href={source.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <div>
+                      <strong>{source.title}</strong>
+                      <span>{source.organization}</span>
+                    </div>
+
+                    <span aria-hidden="true">↗</span>
+                  </a>
+                ))}
+              </div>
+
+              <p className="note ai-source-note">
+                These references were supplied to the AI as
+                context. Individual claims have not been
+                independently verified.
+              </p>
+            </section>
+          )}
         </div>
       </div>
     </section>
   );
 }
+

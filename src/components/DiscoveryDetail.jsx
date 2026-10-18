@@ -61,34 +61,89 @@ function DiscoveryDetail({ discovery, onClose }) {
 
       <div className="detail__grid">
         <div className="detail__block">
-          <h3 className="detail__block-title">Tutor explanation</h3>
-          {/* Deliberately empty: no answer is generated yet, and no
-              placeholder text pretends to be one. */}
-          <p className="placeholder">
-            Not generated yet. The Grok tutor is still being built, so no
-            explanation is shown here.
-          </p>
+          <h3 className="detail__block-title">
+            Why This Matters
+          </h3>
+
+          {discovery.explanation ? (
+            <p>{discovery.explanation}</p>
+          ) : (
+            <p className="placeholder">
+              Detailed information is not available
+              for this discovery yet.
+            </p>
+          )}
+
+          {discovery.actionSteps?.length > 0 && (
+            <>
+              <h3 className="detail__block-title">
+                What You Can Do
+              </h3>
+
+              <ol>
+                {discovery.actionSteps.map((step, index) => (
+                  <li key={index}>{step}</li>
+                ))}
+              </ol>
+            </>
+          )}
         </div>
 
         <div className="detail__block">
-          <h3 className="detail__block-title">Sources &amp; citations</h3>
-          <ul className="citations">
-            <li className="citations__empty">
-              No sources listed. Source selection and citation verification are
-              not built yet.
-            </li>
-          </ul>
+          <h3 className="detail__block-title">
+            Official References
+          </h3>
+
+          {discovery.sources?.length > 0 ? (
+            <>
+              <ul className="citations">
+                {discovery.sources.map((source) => (
+                  <li key={source.id}>
+                    <a
+                      href={source.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {source.organization}
+                      {" — "}
+                      {source.title} ↗
+                    </a>
+                  </li>
+                ))}
+              </ul>
+
+              <p className="detail__foot-note">
+                These references were supplied
+                to the AI as context. Individual
+                claims have not been independently
+                verified.
+              </p>
+            </>
+          ) : (
+            <p className="placeholder">
+              No official references are available
+              for this discovery yet.
+            </p>
+          )}
         </div>
       </div>
 
       <div className="detail__foot">
-        <button type="button" className="btn btn--light" onClick={onClose}>
+        <button
+          type="button"
+          className="btn btn--light"
+          onClick={onClose}
+        >
           Close
         </button>
-        <p className="detail__foot-note">Or press Esc to close.</p>
+
+        <p className="detail__foot-note">
+          Or press Esc to close.
+        </p>
       </div>
     </section>
   );
 }
+
 
 export default DiscoveryDetail;
