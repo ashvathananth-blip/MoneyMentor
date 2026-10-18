@@ -18,7 +18,7 @@ import CategoryFilter from "./components/CategoryFilter.jsx";
 import DiscoveryCard from "./components/DiscoveryCard.jsx";
 import DiscoveryDetail from "./components/DiscoveryDetail.jsx";
 import SpotTheCatch from "./components/SpotTheCatch.jsx";
-import TutorPlaceholder from "./components/TutorPlaceholder.jsx";
+import AITutor from "./components/AITutor.jsx";
 import Footer from "./components/Footer.jsx";
 import "./App.css";
 
@@ -110,7 +110,7 @@ function App() {
         </section>
 
         <SpotTheCatch />
-        <TutorPlaceholder />
+        <AITutor />
       </main>
 
       <Footer />

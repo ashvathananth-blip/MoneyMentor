@@ -1,5 +1,44 @@
+// MoneyMentor — Ask MoneyMentor AI.
+//
+// LOGIC IS STUDENT-WRITTEN AND PRESERVED
+//   • The question / answer / loading / error state.
+//   • The POST to the local proxy at /api/ask.
+//
+// AI-GENERATED IN THIS REVISION
+//   • The section shell (.section + .wrap + .section__head) so the tutor uses
+//     the same layout, headings and panel styling as the rest of the page.
+//   • The bouncing-dots <ThinkingDots /> indicator used while waiting.
+//   • The answer / error presentation classes.
+// No grading, filtering, recommendation or source-verification logic was added:
+// the response's `sources` and `verified` fields are still ignored.
 
 import { useState } from "react";
+import { SparkIcon } from "./icons.jsx";
+
+// The answer is rendered verbatim (plain text, no Markdown parser), and the
+// model still occasionally wraps labels in **bold** or starts a line with #
+// despite the plain-text instruction in the system prompt. Those markers would
+// show up as literal characters, so the display copy has the few that appear in
+// practice stripped out. Presentation only — the wording is not altered.
+function toPlainText(text) {
+  return text
+    .replace(/^#{1,6}\s*/gm, "")
+    .replace(/\*\*(.+?)\*\*/g, "$1")
+    .replace(/__(.+?)__/g, "$1")
+    .replace(/`/g, "")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+function ThinkingDots() {
+  return (
+    <span className="thinking" aria-hidden="true">
+      <span className="thinking__dot" />
+      <span className="thinking__dot" />
+      <span className="thinking__dot" />
+    </span>
+  );
+}
 
 export default function AITutor() {
   const [question, setQuestion] = useState("");
@@ -20,27 +59,23 @@ export default function AITutor() {
       const response = await fetch("/api/ask", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          question: question.trim()
-        })
+          question: question.trim(),
+        }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(
-          data.error || "Something went wrong."
-        );
+        throw new Error(data.error || "Something went wrong.");
       }
 
-      setAnswer(data.answer || "No answer returned.");
+      setAnswer(toPlainText(data.answer || "No answer returned."));
     } catch (err) {
       setError(
-        err instanceof Error
-          ? err.message
-          : "Unable to contact the AI."
+        err instanceof Error ? err.message : "Unable to contact the AI."
       );
     } finally {
       setLoading(false);
@@ -48,56 +83,90 @@ export default function AITutor() {
   }
 
   return (
-    <section className="ai-tutor">
-      <h2>Ask MoneyMentor AI</h2>
+    <section className="section" id="tutor" aria-labelledby="tutor-title">
+      <div className="wrap">
+        <div className="section__head">
+          <p className="eyebrow">Ask the Tutor</p>
+          <h2 className="section__title" id="tutor-title">
+            Ask MoneyMentor AI
+          </h2>
+          <p className="section__lede">
+            Explore financial concepts, opportunities and risks with an
+            AI-powered tutor, then check the official sources before you act on
+            anything.
+          </p>
+        </div>
 
-      <p>
-        Explore financial concepts, opportunities,
-        and risks with an AI-powered tutor.
-      </p>
+        <div className="tutor__panel">
+          <form className="tutor__row" onSubmit={askMoneyMentor}>
+            <label className="sr-only" htmlFor="tutor-question">
+              Ask a financial question
+            </label>
+            <textarea
+              className="tutor__input"
+              id="tutor-question"
+              name="tutor-question"
+              value={question}
+              onChange={(event) => setQuestion(event.target.value)}
+              placeholder="Can I build credit before 18?"
+              maxLength={1000}
+              required
+            />
 
-      <form onSubmit={askMoneyMentor}>
-        <input
-          type="text"
-          value={question}
-          onChange={(event) =>
-            setQuestion(event.target.value)
-          }
-          placeholder="Can I build credit before 18?"
-          maxLength={1000}
-          aria-label="Ask a financial question"
-          required
-        />
+            <button
+              type="submit"
+              className={
+                loading ? "btn btn--accent is-thinking" : "btn btn--accent"
+              }
+              aria-busy={loading}
+              disabled={loading || !question.trim()}
+            >
+              {loading ? (
+                <>
+                  <ThinkingDots />
+                  <span className="sr-only">Thinking</span>
+                </>
+              ) : (
+                <>
+                  <SparkIcon />
+                  Ask AI
+                </>
+              )}
+            </button>
+          </form>
 
-        <button
-          type="submit"
-          disabled={loading || !question.trim()}
-        >
-          {loading ? "Thinking..." : "Ask AI"}
-        </button>
-      </form>
-
-      {error && (
-        <p role="alert" className="ai-error">
-          {error}
-        </p>
-      )}
-
-      {answer && (
-        <div className="ai-response" aria-live="polite">
-          <h3>MoneyMentor explains</h3>
-          <p style={{ whiteSpace: "pre-wrap" }}>
-            {answer}
+          <p className="note ai-tutor__hint">
+            Answers are AI-generated and source verification is not enabled yet.
+            Check official sources before relying on financial rules or
+            eligibility details.
           </p>
 
-          <small>
-            AI-generated educational information.
-            Source verification is not yet enabled.
-            Check official sources before relying
-            on financial rules or eligibility details.
-          </small>
+          {/* Announces the pending state for screen readers; the visible dots
+              are decorative and already hidden from the accessibility tree. */}
+          <p className="sr-only" role="status">
+            {loading ? "MoneyMentor is thinking." : ""}
+          </p>
+
+          {error && (
+            <p role="alert" className="ai-error">
+              {error}
+            </p>
+          )}
+
+          <div className="ai-response" aria-live="polite">
+            {answer && (
+              <>
+                <h3 className="ai-response__title">MoneyMentor explains</h3>
+                <p className="ai-response__body">{answer}</p>
+                <p className="note ai-response__note">
+                  AI-generated educational information. Source verification is
+                  not yet enabled, so no source is attached to this answer.
+                </p>
+              </>
+            )}
+          </div>
         </div>
-      )}
+      </div>
     </section>
   );
 }

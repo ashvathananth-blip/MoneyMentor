@@ -914,3 +914,124 @@ html {
     padding: 22px;
   }
 }
+
+/* 11b. Ask MoneyMentor AI -------------------------------------------------
+   Reuses the .section / .tutor__panel shells above, so only the answer card,
+   the error state and the thinking indicator are new here. */
+
+.ai-tutor__hint {
+  margin-top: 12px;
+}
+
+/* The icons carry no width/height attributes, and a viewBox-only <svg> defaults
+   to 100% width. In the side-by-side row it happens to shrink, but once
+   .tutor__row stacks on mobile the glyph balloons to fill the button. */
+.tutor__row .btn svg {
+  width: 17px;
+  height: 17px;
+  flex: none;
+}
+
+/* The loading label is three dots, which is shorter than "Ask AI" plus an
+   icon; without a floor the button shrinks by a few pixels mid-request. */
+.tutor__row .btn {
+  min-height: 44px;
+}
+
+/* An empty styled box before the first answer would read as a broken panel,
+   so the container is hidden until it actually has content. Keeping it mounted
+   also means aria-live announces the first answer when it arrives. */
+.ai-response {
+  margin-top: 22px;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+
+.ai-response:empty {
+  /* Collapsed rather than display:none, which would take the live region out
+     of the accessibility tree and silence the first answer. */
+  margin-top: 0;
+  padding: 0;
+  border-width: 0;
+  background: transparent;
+}
+
+.ai-response__title {
+  margin-bottom: 8px;
+}
+
+.ai-response__body {
+  /* Cap the measure: at full panel width these answers run to ~130 characters
+     per line, well past the 62ch the section copy uses. */
+  max-width: 72ch;
+  color: var(--ink);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.ai-response__note {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.ai-error {
+  margin-top: 16px;
+  padding: 13px 15px;
+  border: 1px solid #f3c3bd;
+  border-radius: var(--radius);
+  background: #fdf1f0;
+  color: #8f1d12;
+  font-size: 0.9rem;
+}
+
+/* The button is disabled while the request is in flight, and the shared
+   .btn[disabled] rule fades it to 0.55 — which would wash the dots out to
+   near-invisible. The loading state keeps full accent contrast instead. */
+.btn.is-thinking[disabled] {
+  opacity: 1;
+  cursor: progress;
+  box-shadow: 0 12px 22px -14px rgba(43, 108, 255, 0.95);
+}
+
+/* Thinking indicator — three dots that bounce in sequence while the request
+   is in flight. Each dot runs the same keyframes offset by a fraction of the
+   cycle, so the motion reads as a wave rather than three separate jumps. */
+.thinking {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 1em;
+}
+
+.thinking__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: thinking-bounce 1.15s cubic-bezier(0.36, 0.07, 0.19, 0.97) infinite;
+}
+
+.thinking__dot:nth-child(2) {
+  animation-delay: 0.16s;
+}
+
+.thinking__dot:nth-child(3) {
+  animation-delay: 0.32s;
+}
+
+@keyframes thinking-bounce {
+  0%,
+  70%,
+  100% {
+    transform: translateY(0) scale(0.9);
+    opacity: 0.45;
+  }
+
+  35% {
+    transform: translateY(-5px) scale(1.05);
+    opacity: 1;
+  }
+}

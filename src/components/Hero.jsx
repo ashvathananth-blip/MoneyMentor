@@ -27,7 +27,7 @@ function Hero({ categories }) {
             </a>
             <a className="btn btn--ghost" href="#tutor">
               Ask the Tutor
-              <span className="badge badge--soon">Soon</span>
+              <ArrowRight />
             </a>
           </div>
 

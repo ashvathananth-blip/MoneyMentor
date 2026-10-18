@@ -108,6 +108,16 @@ app.post("/api/ask", async (req, res) => {
 
                 Keep responses educational,
                 understandable, and practical.
+
+                Write plain text only. Never use
+                asterisks, underscores, hash marks,
+                backticks or any other Markdown
+                syntax — the interface shows the
+                answer exactly as written, so those
+                characters appear as literal symbols.
+                No headings and no bold. Use short
+                paragraphs, and plain lines starting
+                with a hyphen when a list helps.
               `
             },
             {
