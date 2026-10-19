@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48" role="img" aria-label="MoneyMentor">
+  <rect width="48" height="48" rx="12" fill="#071a33" />
+  <path d="M12 33V17.5L24 28l12-10.5V33" fill="none" stroke="#ffffff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round" />
+  <circle cx="24" cy="33" r="2.4" fill="#2b6cff" />
+</svg>

@@ -47,9 +47,14 @@ function App() {
   const [discoveryError, setDiscoveryError] = useState("");
   const initialLoadStarted = useRef(false);
 
+  // `silent` is for the automatic load on first paint. The public preview is a
+  // static build with no /api backend, so that request is expected to fail
+  // there; the starter cards should simply stay put instead of greeting every
+  // visitor with an error. Asking for more discoveries still reports failures.
   async function loadDiscoveries(
     titlesToAvoid = [],
-    sourceIdsToAvoid = []
+    sourceIdsToAvoid = [],
+    { silent = false } = {}
   ) {
     setLoadingDiscoveries(true);
     setDiscoveryError("");
@@ -102,11 +107,13 @@ function App() {
       setSelectedTip(null);
       setActiveCategory("All");
     } catch (error) {
-      setDiscoveryError(
-        error instanceof Error
-          ? error.message
-          : "Unable to generate discoveries."
-      );
+      if (!silent) {
+        setDiscoveryError(
+          error instanceof Error
+            ? error.message
+            : "Unable to generate discoveries."
+        );
+      }
     } finally {
       setLoadingDiscoveries(false);
     }
@@ -116,7 +123,7 @@ function App() {
     if (initialLoadStarted.current) return;
 
     initialLoadStarted.current = true;
-    loadDiscoveries([]);
+    loadDiscoveries([], [], { silent: true });
   }, []);
 
   const categories = [
