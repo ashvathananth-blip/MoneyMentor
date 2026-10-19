@@ -1,5 +1,7 @@
 ## How to Use MoneyMentor
 
+ - Project does require user to have vercel as it is deployed onto that platform.
+ 
  - Discover Financial Opportunities: Explore AI-generated cards about college, credit, banking, investing, and employment.
 
  - Explore: Click a discovery card to read its explanation, suggested actions, and available official references.
