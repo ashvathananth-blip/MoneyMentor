@@ -18,3 +18,4 @@ export const discoveries = [
     description: "Understand earned income and custodial accounts."
   }
 ];
+
