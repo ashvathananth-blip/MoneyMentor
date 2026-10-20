@@ -17,3 +17,5 @@ If you are developing a production application, we recommend using TypeScript wi
 
 ## Documentation
 - [Development Log](doc/development_log.md)
+- [sources](doc/sources.md)
+- [Testing](doc/Testing.md)
